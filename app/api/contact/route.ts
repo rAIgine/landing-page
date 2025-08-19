@@ -5,7 +5,6 @@ export async function POST(request: NextRequest) {
   try {
     const { email, contact, message } = await request.json();
 
-    // Validate input
     if (!email || !message || !contact) {
       return NextResponse.json(
         { error: "Email, contact, and message are required" },
@@ -13,7 +12,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Validate environment variables
     if (!process.env.SMTP_USER || !process.env.SMTP_PASS) {
       console.error("Missing SMTP credentials in environment variables");
       return NextResponse.json(
@@ -22,18 +20,16 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Example for Gmail (you'll need to set up environment variables)
     const transporter = nodemailer.createTransport({
       host: process.env.SMTP_USER || "smtp.gmail.com",
       port: parseInt(process.env.SMTP_PORT || "587"),
-      secure: false, // true for 465, false for other ports
+      secure: false,
       auth: {
-        user: process.env.SMTP_USER, // Your email
-        pass: process.env.SMTP_PASS, // Your app password
+        user: process.env.SMTP_USER,
+        pass: process.env.SMTP_PASS,
       },
     });
 
-    // Email options
     const mailOptions = {
       from: process.env.SMTP_USER,
       to: process.env.SMTP_USER,
@@ -64,7 +60,6 @@ export async function POST(request: NextRequest) {
       `,
     };
 
-    // Send email
     await transporter.sendMail(mailOptions);
 
     return NextResponse.json(
@@ -74,7 +69,6 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error("Error sending email:", error);
 
-    // Provide more specific error information for debugging
     let errorMessage = "Failed to send email";
     if (error instanceof Error) {
       console.error("Error details:", {
@@ -83,7 +77,6 @@ export async function POST(request: NextRequest) {
         name: error.name,
       });
 
-      // Check for common SMTP errors
       if (error.message.includes("Invalid login")) {
         errorMessage =
           "SMTP authentication failed. Please check your email credentials.";
