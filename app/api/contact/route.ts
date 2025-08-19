@@ -22,10 +22,9 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Create transporter - You need to configure this with your email service
     // Example for Gmail (you'll need to set up environment variables)
     const transporter = nodemailer.createTransport({
-      host: process.env.SMTP_HOST || "smtp.gmail.com",
+      host: process.env.SMTP_USER || "smtp.gmail.com",
       port: parseInt(process.env.SMTP_PORT || "587"),
       secure: false, // true for 465, false for other ports
       auth: {
@@ -37,7 +36,7 @@ export async function POST(request: NextRequest) {
     // Email options
     const mailOptions = {
       from: process.env.SMTP_USER,
-      to: process.env.CONTACT_EMAIL || process.env.SMTP_USER, // Where to send contact messages
+      to: process.env.SMTP_USER,
       subject: "Form Submission - Raigine",
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 100%; margin: 0 auto;">
