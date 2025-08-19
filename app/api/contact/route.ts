@@ -3,12 +3,12 @@ import nodemailer from "nodemailer";
 
 export async function POST(request: NextRequest) {
   try {
-    const { email, message } = await request.json();
+    const { email, contact, message } = await request.json();
 
     // Validate input
-    if (!email || !message) {
+    if (!email || !message || !contact) {
       return NextResponse.json(
-        { error: "Email and message are required" },
+        { error: "Email, contact, and message are required" },
         { status: 400 }
       );
     }
@@ -44,6 +44,7 @@ export async function POST(request: NextRequest) {
           <h2 style="color: #0047D9;">New Contact Form Submission</h2>
           <div style="background-color: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0;">
             <p><strong>From:</strong> ${email}</p>
+            <p><strong>Contact:</strong> ${contact || "No contact provided"}</p>
             <p><strong>Message:</strong></p>
             <p style="background-color: white; padding: 15px; border-radius: 4px; border-left: 4px solid #0047D9;">
               ${message.replace(/\n/g, "<br>")}

@@ -1,6 +1,6 @@
 "use client";
 import { useState } from "react";
-import { X, Mail, MessageSquare, Send } from "lucide-react";
+import { X, Mail, MessageSquare, Send, Phone } from "lucide-react";
 
 interface ContactModalProps {
   isOpen: boolean;
@@ -10,6 +10,7 @@ interface ContactModalProps {
 export const ContactModal = ({ isOpen, onClose }: ContactModalProps) => {
   const [email, setEmail] = useState("");
   const [message, setMessage] = useState("");
+  const [contact, setContact] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
 
@@ -26,10 +27,10 @@ export const ContactModal = ({ isOpen, onClose }: ContactModalProps) => {
         },
         body: JSON.stringify({
           email,
+          contact,
           message,
         }),
       });
-      console.log(response, "response");
 
       if (!response.ok) {
         throw new Error("Failed to send message");
@@ -109,6 +110,30 @@ export const ContactModal = ({ isOpen, onClose }: ContactModalProps) => {
                     onChange={(e) => setEmail(e.target.value)}
                     className="block w-full pl-10 pr-3 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-[#0047D9] focus:border-transparent transition-all duration-200 bg-white text-slate-900 placeholder-slate-400"
                     placeholder="your@email.com"
+                    required
+                  />
+                </div>
+              </div>
+
+              {/* Contact Field */}
+              <div>
+                <label
+                  htmlFor="contact"
+                  className="block text-sm font-medium text-slate-700 mb-2"
+                >
+                  Contact Number
+                </label>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <Phone className="h-5 w-5 text-slate-400" />
+                  </div>
+                  <input
+                    type="tel"
+                    id="contact"
+                    value={contact}
+                    onChange={(e) => setContact(e.target.value)}
+                    className="block w-full pl-10 pr-3 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-[#0047D9] focus:border-transparent transition-all duration-200 bg-white text-slate-900 placeholder-slate-400"
+                    placeholder="(123) 456-7890"
                     required
                   />
                 </div>
