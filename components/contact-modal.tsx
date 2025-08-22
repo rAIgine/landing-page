@@ -78,6 +78,17 @@ export const ContactModal = ({ isOpen, onClose }: ContactModalProps) => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    const newErrors = {
+      email: !validateEmail(email) ? "Format email tidak valid" : "",
+      contact: !validatePhone(contact)
+        ? "Format nomor telepon tidak valid"
+        : "",
+    };
+    setErrors(newErrors);
+    if (Object.values(newErrors).some((error) => error !== "")) {
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {
