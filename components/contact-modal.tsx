@@ -32,10 +32,14 @@ export const ContactModal = ({ isOpen, onClose }: ContactModalProps) => {
         }),
       });
 
-      console.log("Response:", response);
+      console.log("Response status:", response.status);
+      console.log("Response ok:", response.ok);
+
+      const responseData = await response.json();
+      console.log("Response data:", responseData);
 
       if (!response.ok) {
-        throw new Error("Failed to send message");
+        throw new Error(responseData.error || "Failed to send message");
       }
 
       setIsSubmitting(false);
