@@ -35,16 +35,18 @@ export async function POST(request: NextRequest) {
 
     console.log("Creating transporter...");
     const transporter = nodemailer.createTransport({
-      service: "gmail", // Use service instead of manual config
+      host: "smtp.gmail.com",
+      port: 587,
+      secure: false,
       auth: {
-        user: process.env.SMTP_USER,
-        pass: process.env.SMTP_PASS, // Must be App Password!
+        user: "mirzanab76@gmail.com",
+        pass: "achqolvfyiqerfja",
       },
     });
     console.log("Transporter created, preparing mail options...");
     const mailOptions = {
-      from: process.env.SMTP_USER,
-      to: process.env.SMTP_USER,
+      from: "mirzanab76@gmail.com",
+      to: "mirzanab76@gmail.com",
       subject: "Form Submission - Raigine",
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 100%; margin: 0 auto;">
