@@ -39,6 +39,8 @@ export const ContactModal = ({ isOpen, onClose }: ContactModalProps) => {
     contact: "",
   });
 
+  console.log(contact);
+
   const validateEmail = (email: string) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return emailRegex.test(email);
@@ -89,6 +91,9 @@ export const ContactModal = ({ isOpen, onClose }: ContactModalProps) => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    const fullPhoneNumber = selectedCountry.dialCode + contact;
+
     const newErrors = {
       email: !validateEmail(email) ? "Format email tidak valid" : "",
       contact: !validatePhone(contact)
@@ -111,7 +116,7 @@ export const ContactModal = ({ isOpen, onClose }: ContactModalProps) => {
         },
         body: JSON.stringify({
           email,
-          contact,
+          contact: fullPhoneNumber,
           message,
         }),
       });
