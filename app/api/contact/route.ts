@@ -2,10 +2,23 @@ import { NextRequest, NextResponse } from "next/server";
 import nodemailer from "nodemailer";
 
 export async function POST(request: NextRequest) {
+  console.log("=== Contact API Called ===");
+
   try {
+    console.log("Environment check:", {
+      hasUser: !!process.env.SMTP_USER,
+      hasPass: !!process.env.SMTP_PASS,
+      hasHost: !!process.env.SMTP_HOST,
+    });
     const { email, contact, message } = await request.json();
+    console.log("Request data received:", {
+      email,
+      contact: !!contact,
+      message: !!message,
+    });
 
     if (!email || !message || !contact) {
+      console.log("Validation failed - missing fields");
       return NextResponse.json(
         { error: "Email, contact, and message are required" },
         { status: 400 }
@@ -20,6 +33,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    console.log("Creating transporter...");
     const transporter = nodemailer.createTransport({
       host: process.env.SMTP_HOST || "smtp.gmail.com",
       port: parseInt(process.env.SMTP_PORT || "587"),
@@ -28,8 +42,10 @@ export async function POST(request: NextRequest) {
         user: process.env.SMTP_USER,
         pass: process.env.SMTP_PASS,
       },
+      debug: false,
+      logger: false,
     });
-
+    console.log("Transporter created, preparing mail options...");
     const mailOptions = {
       from: process.env.SMTP_USER,
       to: process.env.SMTP_USER,
@@ -60,13 +76,16 @@ export async function POST(request: NextRequest) {
       `,
     };
 
+    console.log("Sending email...");
     await transporter.sendMail(mailOptions);
+    console.log("Email sent successfully!");
 
     return NextResponse.json(
       { message: "Email sent successfully" },
       { status: 200 }
     );
   } catch (error) {
+    console.error("=== ERROR OCCURRED ===");
     console.error("Error sending email:", error);
 
     let errorMessage = "Failed to send email";
@@ -89,9 +108,11 @@ export async function POST(request: NextRequest) {
       } else if (error.message.includes("self signed certificate")) {
         errorMessage =
           "SSL certificate error. Please check your SMTP configuration.";
+      } else if (error.message.includes("ETIMEDOUT")) {
+        errorMessage = "Connection timeout. Please try again.";
       }
     }
-
+    console.error("=== END ERROR ===");
     return NextResponse.json({ error: errorMessage }, { status: 500 });
   }
 }
