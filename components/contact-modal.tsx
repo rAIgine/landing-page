@@ -13,6 +13,68 @@ export const ContactModal = ({ isOpen, onClose }: ContactModalProps) => {
   const [contact, setContact] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [errors, setErrors] = useState({
+    email: "",
+    contact: "",
+  });
+
+  const validateEmail = (email: string) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
+
+  // Phone number validation (Indonesian format)
+  const validatePhone = (phone: string) => {
+    // Remove all non-digits
+    const cleaned = phone.replace(/\D/g, "");
+    // Indonesian phone number: 08xxxxxxxxxx or +628xxxxxxxxxx (8-15 digits after country code)
+    const phoneRegex = /^(\+62|62|0)8[1-9][0-9]{6,11}$/;
+    return phoneRegex.test(cleaned);
+  };
+
+  // Format phone number as user types
+  const formatPhoneNumber = (value: string) => {
+    // Remove all non-digits
+    const cleaned = value.replace(/\D/g, "");
+
+    // Format as Indonesian number
+    if (cleaned.startsWith("62")) {
+      // +62 format
+      const formatted = "+62 " + cleaned.slice(2);
+      return formatted.replace(/(\d{3})(\d{4})(\d{4})/, "$1-$2-$3");
+    } else if (cleaned.startsWith("0")) {
+      // Local format 08xx-xxxx-xxxx
+      return cleaned.replace(/(\d{4})(\d{4})(\d{4})/, "$1-$2-$3");
+    }
+
+    return cleaned;
+  };
+
+  const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setEmail(value);
+
+    if (value && !validateEmail(value)) {
+      setErrors((prev) => ({ ...prev, email: "Format email tidak valid" }));
+    } else {
+      setErrors((prev) => ({ ...prev, email: "" }));
+    }
+  };
+
+  const handleContactChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    const formatted = formatPhoneNumber(value);
+    setContact(formatted);
+
+    if (value && !validatePhone(value)) {
+      setErrors((prev) => ({
+        ...prev,
+        contact: "Format nomor telepon tidak valid (contoh: 0812-3456-7890)",
+      }));
+    } else {
+      setErrors((prev) => ({ ...prev, contact: "" }));
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -113,12 +175,15 @@ export const ContactModal = ({ isOpen, onClose }: ContactModalProps) => {
                     type="email"
                     id="email"
                     value={email}
-                    onChange={(e) => setEmail(e.target.value)}
+                    onChange={handleEmailChange}
                     className="block w-full pl-10 pr-3 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-[#0047D9] focus:border-transparent transition-all duration-200 bg-white text-slate-900 placeholder-slate-400"
                     placeholder="your@email.com"
                     required
                   />
                 </div>
+                {errors.email && (
+                  <p className="mt-1 text-sm text-red-600">{errors.email}</p>
+                )}
               </div>
 
               {/* Contact Field */}
@@ -137,12 +202,15 @@ export const ContactModal = ({ isOpen, onClose }: ContactModalProps) => {
                     type="tel"
                     id="contact"
                     value={contact}
-                    onChange={(e) => setContact(e.target.value)}
+                    onChange={handleContactChange}
                     className="block w-full pl-10 pr-3 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-[#0047D9] focus:border-transparent transition-all duration-200 bg-white text-slate-900 placeholder-slate-400"
                     placeholder="(123) 456-7890"
                     required
                   />
                 </div>
+                {errors.contact && (
+                  <p className="mt-1 text-sm text-red-600">{errors.contact}</p>
+                )}
               </div>
 
               {/* Message Field */}
