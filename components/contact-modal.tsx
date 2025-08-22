@@ -32,6 +32,8 @@ export const ContactModal = ({ isOpen, onClose }: ContactModalProps) => {
         }),
       });
 
+      console.log("Response:", response);
+
       if (!response.ok) {
         throw new Error("Failed to send message");
       }
