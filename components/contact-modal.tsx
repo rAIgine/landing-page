@@ -1,16 +1,37 @@
 "use client";
 import { useState } from "react";
-import { X, Mail, MessageSquare, Send, Phone } from "lucide-react";
+import { X, Mail, MessageSquare, Send, Phone, ChevronDown } from "lucide-react";
+import { countries, Country } from "./countries";
 
 interface ContactModalProps {
   isOpen: boolean;
   onClose: () => void;
 }
 
+const FlagIcon = ({ countryCode }: { countryCode: string }) => {
+  return (
+    <img
+      src={`https://flagcdn.com/w20/${countryCode.toLowerCase()}.png`}
+      alt={`${countryCode} flag`}
+      className="w-5 h-4 object-cover rounded-sm"
+      onError={(e) => {
+        // Fallback jika gambar tidak load
+        e.currentTarget.style.display = "none";
+        (e.currentTarget.nextElementSibling as HTMLElement).style.display =
+          "inline";
+      }}
+    />
+  );
+};
+
 export const ContactModal = ({ isOpen, onClose }: ContactModalProps) => {
   const [email, setEmail] = useState("");
   const [message, setMessage] = useState("");
   const [contact, setContact] = useState("");
+  const [selectedCountry, setSelectedCountry] = useState<Country>(
+    countries[89]
+  );
+  const [isCountryDropdownOpen, setIsCountryDropdownOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [errors, setErrors] = useState({
@@ -25,28 +46,13 @@ export const ContactModal = ({ isOpen, onClose }: ContactModalProps) => {
 
   // Phone number validation (Indonesian format)
   const validatePhone = (phone: string) => {
-    // Remove all non-digits
     const cleaned = phone.replace(/\D/g, "");
-    // Indonesian phone number: 08xxxxxxxxxx or +628xxxxxxxxxx (8-15 digits after country code)
-    const phoneRegex = /^(\+62|62|0)8[1-9][0-9]{6,11}$/;
-    return phoneRegex.test(cleaned);
+    return cleaned.length >= 8 && cleaned.length <= 15;
   };
 
   // Format phone number as user types
   const formatPhoneNumber = (value: string) => {
-    // Remove all non-digits
     const cleaned = value.replace(/\D/g, "");
-
-    // Format as Indonesian number
-    if (cleaned.startsWith("62")) {
-      // +62 format
-      const formatted = "+62 " + cleaned.slice(2);
-      return formatted.replace(/(\d{3})(\d{4})(\d{4})/, "$1-$2-$3");
-    } else if (cleaned.startsWith("0")) {
-      // Local format 08xx-xxxx-xxxx
-      return cleaned.replace(/(\d{4})(\d{4})(\d{4})/, "$1-$2-$3");
-    }
-
     return cleaned;
   };
 
@@ -69,11 +75,16 @@ export const ContactModal = ({ isOpen, onClose }: ContactModalProps) => {
     if (value && !validatePhone(value)) {
       setErrors((prev) => ({
         ...prev,
-        contact: "Format nomor telepon tidak valid (contoh: 0812-3456-7890)",
+        contact: "Format nomor telepon tidak valid",
       }));
     } else {
       setErrors((prev) => ({ ...prev, contact: "" }));
     }
+  };
+
+  const handleCountrySelect = (country: Country) => {
+    setSelectedCountry(country);
+    setIsCountryDropdownOpen(false);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -200,22 +211,81 @@ export const ContactModal = ({ isOpen, onClose }: ContactModalProps) => {
               {/* Contact Field */}
               <div>
                 <label
-                  htmlFor="contact"
+                  htmlFor="phone"
                   className="block text-sm font-medium text-slate-700 mb-2"
                 >
-                  Contact Number
+                  Contact
                 </label>
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <Phone className="h-5 w-5 text-slate-400" />
+                <div className="flex">
+                  {/* Country Code Dropdown */}
+                  <div className="relative">
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setIsCountryDropdownOpen(!isCountryDropdownOpen)
+                      }
+                      className={`flex items-center px-3 py-3 border border-r-0 rounded-l-lg bg-white hover:bg-gray-50 focus:ring-2 focus:ring-[#0047D9] focus:border-transparent transition-all duration-200 ${
+                        errors.contact ? "border-red-500" : "border-slate-300"
+                      }`}
+                    >
+                      <div className="flex items-center mr-2">
+                        <FlagIcon countryCode={selectedCountry.code} />
+                        <span
+                          className="text-lg ml-1 hidden"
+                          style={{ display: "none" }}
+                        >
+                          {selectedCountry.flag}
+                        </span>
+                      </div>
+                      <span className="text-sm font-medium text-slate-700 mr-1">
+                        {selectedCountry.dialCode}
+                      </span>
+                      <ChevronDown className="h-4 w-4 text-slate-400" />
+                    </button>
+
+                    {/* Dropdown Menu */}
+                    {isCountryDropdownOpen && (
+                      <div className="absolute top-full left-0 mt-1 w-64 bg-white border border-slate-300 rounded-lg shadow-lg z-50 max-h-60 overflow-y-auto">
+                        {countries.map((country) => (
+                          <button
+                            key={country.code}
+                            type="button"
+                            onClick={() => handleCountrySelect(country)}
+                            className="w-full flex items-center justify-between px-3 py-2 hover:bg-blue-50 text-left"
+                          >
+                            <div className="flex items-center">
+                              <div className="flex items-center mr-2">
+                                <FlagIcon countryCode={country.code} />
+                                <span
+                                  className="text-lg ml-1 hidden"
+                                  style={{ display: "none" }}
+                                >
+                                  {country.flag}
+                                </span>
+                              </div>
+                              <span className="text-sm text-slate-700">
+                                {country.name}
+                              </span>
+                            </div>
+                            <span className="text-sm text-slate-500">
+                              {country.dialCode}
+                            </span>
+                          </button>
+                        ))}
+                      </div>
+                    )}
                   </div>
+
+                  {/* Phone Number Input */}
                   <input
                     type="tel"
-                    id="contact"
+                    id="phone"
                     value={contact}
                     onChange={handleContactChange}
-                    className="block w-full pl-10 pr-3 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-[#0047D9] focus:border-transparent transition-all duration-200 bg-white text-slate-900 placeholder-slate-400"
-                    placeholder="(123) 456-7890"
+                    className={`flex-1 px-3 py-2 border rounded-r-lg focus:ring-2 focus:ring-[#0047D9] focus:border-transparent transition-all duration-200 bg-white text-slate-900 placeholder-slate-400 ${
+                      errors.contact ? "border-red-500" : "border-slate-300"
+                    }`}
+                    placeholder="87876567888"
                     required
                   />
                 </div>
