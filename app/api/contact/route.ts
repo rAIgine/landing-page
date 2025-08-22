@@ -5,17 +5,7 @@ export async function POST(request: NextRequest) {
   console.log("=== Contact API Called ===");
 
   try {
-    console.log("Environment check:", {
-      hasUser: !!process.env.SMTP_USER,
-      hasPass: !!process.env.SMTP_PASS,
-      hasHost: !!process.env.SMTP_HOST,
-    });
     const { email, contact, message } = await request.json();
-    console.log("Request data received:", {
-      email,
-      contact: !!contact,
-      message: !!message,
-    });
 
     if (!email || !message || !contact) {
       console.log("Validation failed - missing fields");
@@ -25,13 +15,13 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    if (!process.env.SMTP_USER || !process.env.SMTP_PASS) {
-      console.error("Missing SMTP credentials in environment variables");
-      return NextResponse.json(
-        { error: "Server configuration error" },
-        { status: 500 }
-      );
-    }
+    // if (!process.env.SMTP_USER || !process.env.SMTP_PASS) {
+    //   console.error("Missing SMTP credentials in environment variables");
+    //   return NextResponse.json(
+    //     { error: "Server configuration error" },
+    //     { status: 500 }
+    //   );
+    // }
 
     console.log("Creating transporter...");
     const transporter = nodemailer.createTransport({
@@ -39,14 +29,14 @@ export async function POST(request: NextRequest) {
       port: 587,
       secure: false,
       auth: {
-        user: "mirzanab76@gmail.com",
-        pass: "achqolvfyiqerfja",
+        user: "info@raigine.com",
+        pass: "wmkvtzmbrycivgmq",
       },
     });
     console.log("Transporter created, preparing mail options...");
     const mailOptions = {
-      from: "mirzanab76@gmail.com",
-      to: "mirzanab76@gmail.com",
+      from: "info@raigine.com",
+      to: "info@raigine.com",
       subject: "Form Submission - Raigine",
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 100%; margin: 0 auto;">
